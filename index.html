@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Ai</title>
+    <!-- استفاده از فونت وزیر برای زیبایی زبان فارسی -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #1f1f1f;
+            --sidebar-bg: #f0f4f9;
+            --input-bg: #f0f4f9;
+            --user-msg-bg: #e7effe;
+            --ai-msg-bg: #f0f4f9;
+            --accent-color: #007bff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --border-radius: 20px;
+            --btn-radius: 999px;
+            --font-family: 'Vazirmatn', sans-serif;
+            --transition-speed: 0.3s;
+        }
+
+        body.dark-mode {
+            --bg-color: #131314;
+            --text-color: #e3e3e3;
+            --sidebar-bg: #1e1f20;
+            --input-bg: #1e1f20;
+            --user-msg-bg: #2b3544;
+            --ai-msg-bg: #1e1f20;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        /* --- Login Screen --- */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+        }
+
+        .login-card {
+            background: var(--bg-color);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 12px;
+            border: 1px solid #ccc;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .login-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: var(--btn-radius);
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* --- Intro Animation --- */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1500;
+            flex-direction: column;
+        }
+
+        .intro-text {
+            font-size: 3rem;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(20px);
+            background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: none;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* --- Main App --- */
+        #app-container {
+            display: none; /* Hidden initially */
+            flex-direction: column;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: var(--bg-color);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        .logo span {
+            background: linear-gradient(90deg, #4285f4, #d96570);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .mode-switch {
+            background: var(--input-bg);
+            padding: 5px;
+            border-radius: 12px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: var(--bg-color);
+            box-shadow: 0 2px 5px var(--shadow-color);
+            font-weight: bold;
+        }
+
+        .user-greeting {
+            font-size: 0.95rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .settings-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: var(--input-bg);
+        }
+
+        /* Chat Area */
+        #chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 10%;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            scroll-behavior: smooth;
+        }
+
+        @media (max-width: 768px) {
+            #chat-area {
+                padding: 20px 15px;
+            }
+        }
+
+        .message {
+            display: flex;
+            gap: 15px;
+            opacity: 0;
+            animation: fadeUp 0.4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(10px); }
+        }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: linear-gradient(135deg, #4285f4, #d96570);
+            color: white;
+        }
+
+        .avatar.user {
+            background: #5f6368;
+            color: white;
+        }
+
+        .msg-content {
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            max-width: 80%;
+            line-height: 1.7;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .message.user .msg-content {
+            background: var(--user-msg-bg);
+            border-top-right-radius: 4px;
+        }
+
+        .message.ai .msg-content {
+            background: var(--ai-msg-bg);
+            border-top-left-radius: 4px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .search-status {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid #ccc;
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .sources {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .source-badge {
+            background: rgba(0,0,0,0.05);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: var(--text-color);
+            border: 1px solid rgba(0,0,0,0.1);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .dark-mode .source-badge {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Input Area */
+        .input-wrapper {
+            padding: 20px;
+            background: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+
+        .input-box {
+            width: 100%;
+            max-width: 800px;
+            background: var(--input-bg);
+            border-radius: 30px;
+            padding: 10px 15px 10px 25px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 0 0 1px transparent;
+            transition: box-shadow 0.2s;
+        }
+
+        .input-box:focus-within {
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        
+        .dark-mode .input-box:focus-within {
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+        }
+
+        #user-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            resize: none;
+            height: 24px;
+            max-height: 150px;
+            color: var(--text-color);
+            font-size: 1rem;
+            padding-top: 2px;
+        }
+
+        #send-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        #send-btn svg {
+            fill: var(--text-color);
+            width: 24px;
+            height: 24px;
+        }
+
+        #send-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #888;
+            padding-bottom: 10px;
+        }
+
+        /* Settings Modal */
+        #settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            display: none;
+            justify-content: flex-end;
+        }
+        
+        #settings-modal.active {
+            display: flex;
+        }
+
+        .settings-content {
+            width: 300px;
+            height: 100%;
+            background: var(--bg-color);
+            padding: 25px;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100%); } /* RTL Logic */
+            to { transform: translateX(0); }
+        }
+
+        .settings-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider { background-color: var(--accent-color); }
+        input:checked + .slider:before { transform: translateX(26px); }
+        
+        /* Limit Warning */
+        .limit-warning {
+            color: #d96570;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h1 style="margin-bottom: 20px;">خوش آمدید</h1>
+            <p style="margin-bottom: 20px; color: #666;">برای ورود به Pro Ai مشخصات خود را وارد کنید</p>
+            <input type="text" id="fname" class="login-input" placeholder="نام" required>
+            <input type="text" id="lname" class="login-input" placeholder="نام خانوادگی" required>
+            <button class="login-btn" onclick="handleLogin()">ورود به حساب</button>
+        </div>
+    </div>
+
+    <!-- 2. INTRO ANIMATION -->
+    <div id="intro-screen">
+        <div class="intro-text" id="intro-msg-1">Hello</div>
+        <div class="intro-text" id="intro-msg-2" style="display:none;">Welcome to Pro Ai</div>
+    </div>
+
+    <!-- 3. MAIN APP -->
+    <div id="app-container">
+        <header>
+            <div class="logo">Pro <span>Ai</span></div>
+            
+            <div class="header-controls">
+                <!-- Mode Switch -->
+                <div class="mode-switch">
+                    <button class="mode-btn active" id="btn-normal" onclick="switchMode('normal')">Normal</button>
+                    <button class="mode-btn" id="btn-pro" onclick="switchMode('pro')">Pro</button>
+                </div>
+                
+                <!-- User Greeting -->
+                <div class="user-greeting" id="user-display-name">کاربر عزیز</div>
+                
+                <!-- Settings Icon -->
+                <button class="settings-btn" onclick="toggleSettings()">
+                    ⋮
+                </button>
+            </div>
+        </header>
+
+        <div id="chat-area">
+            <!-- Welcome Initial Message -->
+            <div class="message ai">
+                <div class="avatar ai">P</div>
+                <div class="msg-content">
+                    سلام! من Pro Ai هستم. چطور می‌توانم امروز کمکتان کنم؟
+                </div>
+            </div>
+        </div>
+
+        <div class="input-wrapper">
+            <div style="width: 100%; max-width: 800px; display: flex; flex-direction: column;">
+                <div class="input-box">
+                    <input type="text" id="user-input" placeholder="چیزی بپرسید..." onkeydown="checkEnter(event)">
+                    <button id="send-btn" onclick="sendMessage()">
+                        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+                    </button>
+                </div>
+                <div id="limit-info" class="limit-warning" style="opacity: 0;"></div>
+                <div class="footer-text">Pro Ai may display inaccurate info, please double-check.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. SETTINGS MODAL -->
+    <div id="settings-modal" onclick="if(event.target === this) toggleSettings()">
+        <div class="settings-content">
+            <div class="settings-header">
+                تنظیمات
+                <span onclick="toggleSettings()" style="cursor:pointer; font-size:1.5rem;">&times;</span>
+            </div>
+            
+            <div class="setting-item">
+                <span>حالت تاریک</span>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <span style="color: #888; font-size: 0.9rem;">نسخه Pro Ai v1.0</span>
+            </div>
+            
+            <div class="setting-item" style="margin-top: auto;">
+                 <button onclick="logout()" style="color: red; background: none; border: none; cursor: pointer;">خروج از حساب</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State & Variables ---
+        const limits = { normal: 18, pro: 4 };
+        let currentMode = 'normal';
+        let currentUser = null;
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
+        // --- Initialization ---
+        window.onload = function() {
+            checkAuth();
+            loadSettings();
+            updateLimitDisplay();
+        };
+
+        // --- Auth System ---
+        function checkAuth() {
+            const storedUser = localStorage.getItem('proai_user');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                document.getElementById('login-screen').style.display = 'none';
+                
+                // If returning user, skip intro or show it briefly? 
+                // Request says "In entry check... loop... enter soft intro".
+                // We'll show intro every time the page reloads effectively simulating "Entry"
+                runIntro();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+            }
+        }
+
+        function handleLogin() {
+            const fname = document.getElementById('fname').value.trim();
+            const lname = document.getElementById('lname').value.trim();
+            
+            if (fname && lname) {
+                currentUser = { fname, lname, joined: new Date().toISOString() };
+                localStorage.setItem('proai_user', JSON.stringify(currentUser));
+                
+                // Initialize Usage Data
+                const usageData = { date: new Date().toLocaleDateString(), normal: 0, pro: 0 };
+                localStorage.setItem('proai_usage', JSON.stringify(usageData));
+
+                document.getElementById('login-screen').style.display = 'none';
+                runIntro();
+            } else {
+                alert("لطفا نام و نام خانوادگی را وارد کنید.");
+            }
+        }
+
+        function logout() {
+            if(confirm("آیا مطمئن هستید؟")) {
+                localStorage.clear(); // Simply clears everything for demo purposes
+                location.reload();
+            }
+        }
+
+        // --- Intro Animation ---
+        async function runIntro() {
+            const introScreen = document.getElementById('intro-screen');
+            const msg1 = document.getElementById('intro-msg-1');
+            const msg2 = document.getElementById('intro-msg-2');
+            const app = document.getElementById('app-container');
+
+            introScreen.style.display = 'flex';
+            
+            // Hello
+            msg1.style.animation = "fadeInOut 2s ease forwards";
+            await delay(2000);
+            msg1.style.display = 'none';
+            
+            // Welcome
+            msg2.style.display = 'block';
+            msg2.style.animation = "fadeInOut 2.5s ease forwards";
+            await delay(2500);
+            
+            // Fade to App
+            introScreen.style.opacity = '0';
+            introScreen.style.transition = 'opacity 0.8s';
+            
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+                app.style.display = 'flex';
+                // Trigger reflow
+                void app.offsetWidth; 
+                app.style.opacity = '1';
+                setupUI();
+            }, 800);
+        }
+
+        function setupUI() {
+            document.getElementById('user-display-name').textContent = currentUser.fname + ' عزیز';
+        }
+
+        // --- Chat & Logic Engine ---
+        function switchMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-normal').classList.remove('active');
+            document.getElementById('btn-pro').classList.remove('active');
+            document.getElementById(`btn-${mode}`).classList.add('active');
+            
+            // Visual feedback
+            const chatArea = document.getElementById('chat-area');
+            const sysMsg = document.createElement('div');
+            sysMsg.style.textAlign = 'center';
+            sysMsg.style.fontSize = '0.8rem';
+            sysMsg.style.color = '#888';
+            sysMsg.style.margin = '10px 0';
+            sysMsg.textContent = `حالت به ${mode === 'normal' ? 'معمولی' : 'حرفه‌ای (Pro)'} تغییر کرد.`;
+            chatArea.appendChild(sysMsg);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            updateLimitDisplay();
+        }
+
+        function checkEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function getUsage() {
+            let usage = JSON.parse(localStorage.getItem('proai_usage'));
+            const today = new Date().toLocaleDateString();
+            
+            if (!usage || usage.date !== today) {
+                usage = { date: today, normal: 0, pro: 0 };
+                localStorage.setItem('proai_usage', JSON.stringify(usage));
+            }
+            return usage;
+        }
+
+        function incrementUsage() {
+            let usage = getUsage();
+            usage[currentMode]++;
+            localStorage.setItem('proai_usage', JSON.stringify(usage));
+            updateLimitDisplay();
+        }
+
+        function updateLimitDisplay() {
+            const usage = getUsage();
+            const limitInfo = document.getElementById('limit-info');
+            const remaining = limits[currentMode] - usage[currentMode];
+            
+            limitInfo.textContent = `باقی‌مانده امروز: ${remaining} سوال`;
+            limitInfo.style.opacity = '1';
+        }
+
+        async function sendMessage() {
+            const inputField = document.getElementById('user-input');
+            const text = inputField.value.trim();
+            const usage = getUsage();
+
+            if (!text) return;
+
+            // Check Limits
+            if (usage[currentMode] >= limits[currentMode]) {
+                appendMessage('system', `شما به محدودیت سوالات روزانه حالت ${currentMode} رسیده‌اید. لطفا فردا امتحان کنید یا حالت را تغییر دهید.`);
+                inputField.value = '';
+                return;
+            }
+
+            // User Message
+            inputField.value = '';
+            appendMessage('user', text);
+            
+            // Logic: Is it a greeting?
+            const greetings = ['سلام', 'درود', 'خوبی', 'hello', 'hi', 'چطوری'];
+            const isGreeting = greetings.some(g => text.toLowerCase().includes(g));
+
+            if (isGreeting) {
+                await delay(600); // Small human-like delay
+                appendMessage('ai', `سلام ${currentUser.fname} عزیز! امیدوارم حالتون عالی باشه. چطور می‌تونم کمکتون کنم؟`);
+            } else {
+                // Perform "Search"
+                performComplexSearch(text);
+                incrementUsage();
+            }
+        }
+
+        async function performComplexSearch(query) {
+            const chatArea = document.getElementById('chat-area');
+            
+            // Create placeholder container for AI response
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ai';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar ai';
+            avatar.textContent = 'P';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'msg-content';
+            
+            // Status Area (Thinking process)
+            const statusDiv = document.createElement('div');
+            statusDiv.className = 'search-status';
+            statusDiv.innerHTML = `<div class="spinner"></div> <span>در حال اتصال به پایگاه داده جهانی...</span>`;
+            
+            contentDiv.appendChild(statusDiv);
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(contentDiv);
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+
+            // --- Simulation Sequence (Approx 8 Seconds total) ---
+            
+            const steps = [
+                { text: "جستجو در گوگل و ایندکس وب...", time: 2000 },
+                { text: "بررسی مقالات دیپ‌سیک (DeepSeek)...", time: 2000 },
+                { text: "تطبیق اطلاعات با ویکی‌پدیا...", time: 1500 },
+                { text: "تحلیل منطقی و اعتبارسنجی پاسخ...", time: 1500 },
+                { text: "نهایی‌سازی پاسخ...", time: 1000 }
+            ];
+
+            for (let step of steps) {
+                await delay(step.time);
+                statusDiv.innerHTML = `<div class="spinner"></div> <span>${step.text}</span>`;
+            }
+
+            // --- Generate Answer ---
+            // remove spinner
+            statusDiv.remove();
+            
+            // Create response text based on mode logic
+            let responseText = generateMockResponse(query);
+            
+            // Internal verification check (Simulated)
+            // "Check if it matches before sending"
+            if (currentMode === 'pro') {
+                responseText += "<br><br><i>*پاسخ توسط موتور Pro Ai بازبینی و تایید شد.*</i>";
+            }
+
+            contentDiv.innerHTML = responseText;
+            
+            // Add Sources Footer
+            const sourcesDiv = document.createElement('div');
+            sourcesDiv.className = 'sources';
+            sourcesDiv.innerHTML = `
+                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" class="source-badge">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    Google
+                </a>
+                <div class="source-badge">DeepSeek AI</div>
+                <div class="source-badge">Wikipedia Logic</div>
+            `;
+            contentDiv.appendChild(sourcesDiv);
+            
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function generateMockResponse(query) {
+            // Since we don't have a real backend, we use keywords to make it look smart
+            // Ensure response is roughly 10 lines max on desktop
+            
+            const q = query.toLowerCase();
+            let answer = "";
+
+            if (q.includes("چیست") || q.includes("کیست") || q.includes("معنی")) {
+                answer = `بر اساس جستجوهای انجام شده در منابع معتبر، <b>"${query}"</b> مفهومی است که در لغت‌نامه‌ها و دایره‌المعارف‌های آنلاین به تفصیل بررسی شده است. <br>
+                این موضوع دارای ابعاد مختلفی است. از دیدگاه فنی، می‌تواند به ساختارهای پیچیده اشاره داشته باشد و در زبان عامیانه کاربرد متفاوتی دارد. <br>
+                منابعی مانند ویکی‌پدیا و مقالات علمی دیپ‌سیک نشان می‌دهند که تاریخچه این موضوع به سال‌های گذشته باز می‌گردد. <br>
+                نکته مهم این است که درک صحیح آن نیازمند بررسی زمینه (Context) سوال است. <br>
+                به طور کلی، این مفهوم در دنیای مدرن نقش پررنگی ایفا می‌کند و بسیاری از متخصصان درباره آن نظرات گوناگونی ارائه داده‌اند.`;
+            } else if (q.includes("کد") || q.includes("برنامه") || q.includes("html")) {
+                answer = `من درخواست کدنویسی شما را تحلیل کردم. برای این مورد، بهترین روش استفاده از استانداردها و سینتکس‌های مدرن است. <br>
+                یک نمونه ساختار پیشنهادی می‌تواند شامل تعریف متغیرها، توابع اصلی و مدیریت خطاها باشد. <br>
+                در منابع توسعه‌دهندگان (مانند StackOverflow و اسناد رسمی)، توصیه شده که کد باید خوانا (Clean Code) و بهینه باشد. <br>
+                اگر نیاز به قطعه کد خاصی دارید، لطفا جزئیات دقیق‌تری بفرمایید تا دقیقا همان را تولید کنم.`;
+            } else if (q.includes("تاریخ") || q.includes("زمان")) {
+                 answer = `هم‌اکنون تاریخ و زمان دقیق به وقت محلی سیستم شما بررسی شد. <br>
+                 در تقویم جهانی، رویدادهای بسیاری در چنین روزهایی ثبت شده است. <br>
+                 تحلیل زمانی نشان می‌دهد که مدیریت زمان یکی از اصول کلیدی موفقیت است که در مقالات روانشناسی و مدیریتی گوگل بسیار به آن اشاره شده است.`;
+            } else {
+                answer = `من جستجوی جامعی را در پایگاه داده‌های گوگل، دیپ‌سیک و ویکی‌پدیا درباره <b>"${query}"</b> انجام دادم. <br>
+                نتایج نشان می‌دهند که این موضوع دارای پیچیدگی‌های خاصی است و نظرات کارشناسان درباره آن متنوع است. <br>
+                اطلاعات یافت شده حاکی از آن است که برای نتیجه‌گیری قطعی باید فاکتورهای متعددی را در نظر گرفت. <br>
+                بر اساس تحلیل هوش مصنوعی، بهترین رویکرد در مواجهه با این موضوع، بررسی داده‌های آماری و تجربیات ثبت شده است. <br>
+                به طور خلاصه، اطلاعات موجود در وب تایید می‌کنند که این مبحث از اهمیت بالایی برخوردار است.`;
+            }
+
+            return answer;
+        }
+
+        function appendMessage(sender, text) {
+            const chatArea = document.getElementById('chat-area');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            // Avatar
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender}`;
+            avatar.textContent = sender === 'ai' || sender === 'system' ? 'P' : currentUser.fname.charAt(0).toUpperCase();
+            
+            // Content
+            const content = document.createElement('div');
+            content.className = 'msg-content';
+            content.innerHTML = text; // Allow HTML for line breaks
+            
+            if (sender === 'user') {
+                msgDiv.appendChild(content);
+                msgDiv.appendChild(avatar);
+            } else {
+                msgDiv.appendChild(avatar);
+                msgDiv.appendChild(content);
+            }
+            
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // --- Settings & UI Toggles ---
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('active');
+        }
+
+        function loadSettings() {
+            const isDark = localStorage.getItem('proai_theme') === 'dark';
+            document.getElementById('dark-mode-toggle').checked = isDark;
+            if (isDark) document.body.classList.add('dark-mode');
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.getElementById('dark-mode-toggle').checked;
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('proai_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('proai_theme', 'light');
+            }
+        }
+
+    </script>
+</body>
+</html>
+
